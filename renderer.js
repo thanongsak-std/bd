@@ -6,7 +6,7 @@
  * to expose Node.js functionality from the main process.
  */
 const baseURL = 'https://thanongsak-std.github.io/bd/public'
-// const baseURL = 'http://localhost:5500/public'
+// const baseURL = 'file:///D:/Student%20Project/BD%20Project/public'
 
 const gallery = document.getElementById('gallery')
 const openDirectory = document.getElementById('openDirectory')
@@ -30,7 +30,7 @@ peer.on('open', async (id) => {
 async function makeAddPeerImage(filePath) {
   const md5 = await window['myAPI'].md5(filePath)
   const text = singleImageURL(md5)
-  const file = await window['myAPI'].getThumbnail(filePath, text)
+  const file = await window['myAPI'].getThumbnail(filePath)
   const fileName = await window['myAPI'].getBasename(filePath)
   return { file, fileName, md5 }
 }
