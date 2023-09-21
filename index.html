@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="script-src 'self' https://cdn.tailwindcss.com https://cdnjs.cloudflare.com">
+    <title>Backdrop Booth</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>#gallery img { width: 100%; } #previewImage img { max-height: 100%; }</style>
+  </head>
+  <body>
+    <div class="h-screen flex flex-col">
+      <div class="bg-white flex justify-center">
+        <img src="IMG/Scan_Top.gif" width="750" height="300">
+      </div>
+      <div 
+        class="bg-white flex justify-center"> 
+        <img src="IMG/Scan.gif" width="600" height="200">
+        <img src="" alt="" id="multipleImage" width="200" height="200">
+        <img src="IMG/Scan_Me.gif" width="600" height="200">
+      </div>
+      <div class="flex-grow white overflow-y-scroll grid grid-cols-5 gap-2 p-5" id="gallery"></div>
+      <div><img src="IMG/Thanongsak.jpg" height="5"></div>
+      <div class="flex gap-4 bg-gray-300">
+        <input type="text" id="directoryPath" readonly class="flex-grow px-4 outline-none">
+        <button id="openDirectory" class="bg-white hover:bg-gray-300 p-1">Select Folder</button>
+      </div>
+    </div>
+
+    <div id="previewImage" class="fixed inset-0 bg-black/[.8] flex items-center justify-center p-2 hidden"><img src="" alt=""></div>
+
+    <!-- You can also require other files to run in this process -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/peerjs/1.4.7/peerjs.min.js"></script>
+    <script src="renderer.js"></script>
+  </body>
+</html>

@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body class="bg-white"> <!-- Change the class to "bg-white" for a white background -->
+    <div class="min-h-screen m-auto max-w-4xl grid grid-cols-3 gap-4 p-4" id="gallery"></div>
+    <img src="" alt="" id="toMultipleImage" class="fixed top-0 right-0">
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/peerjs/1.4.7/peerjs.min.js"></script>
+    <script>
+      const peer = new peerjs.Peer()
+      const gallery = document.getElementById('gallery')
+      const toMultipleImage = document.getElementById('toMultipleImage')
+
+      peer.on('open', () => {
+        const id = location.hash.substring(1)
+        const dataConnection = peer.connect(id, { reliable: true })
+        dataConnection.on('open', () => dataConnection.send('multiple: '))
+        dataConnection.on('data', (data) => {
+          if (data.type == 'add') {
+            const image = document.createElement('img')
+            const file = new File([data.file], data.fileName)
+            image.src = URL.createObjectURL(file)
+            image.onload = (e) => URL.revokeObjectURL(image.src)
+            image.setAttribute('data-md5', data.md5)
+            gallery.insertBefore(image, gallery.firstChild)
+          }
+
+          if (data.type == 'remove') {
+            const selector = `#gallery img[data-md5="${data.md5}"]`
+            const image = document.querySelector(selector)
+            image.parentNode.removeChild(image)
+          }
+
+          if (data.type == 'removeAll') {
+            while (gallery.firstChild)
+              gallery.removeChild(gallery.firstChild)
+          }
+
+          if (data.type == 'toMultipleQRCode') {
+            const blob = new Blob([data.blob])
+            toMultipleImage.src = URL.createObjectURL(blob)
+          }
+        })
+      })
+    </script>
+  </body>
+</html>
