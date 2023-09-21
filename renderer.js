@@ -5,7 +5,7 @@
  * `contextIsolation` is turned on. Use the contextBridge API in `preload.js`
  * to expose Node.js functionality from the main process.
  */
-const baseURL = 'https://thanongsak-std.github.io/bd'
+const baseURL = 'https://thanongsak-std.github.io/bd/public'
 // const baseURL = 'http://localhost:5500/public'
 
 const gallery = document.getElementById('gallery')
