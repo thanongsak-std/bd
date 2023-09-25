@@ -6,7 +6,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
   </head>
   <body class="bg-white"> <!-- Change the class to "bg-white" for a white background -->
-    <img src="../IMG/Scan_Top.gif" alt="" class="m-auto">
+    <img src="IMG/Scan_Top.gif" alt="" class="m-auto">
     <div class="min-h-screen m-auto max-w-4xl grid grid-cols-3 gap-4 p-4" id="gallery"></div>
     <img src="" alt="" id="toMultipleImage" class="fixed top-0 right-0 hidden">
 
@@ -26,7 +26,6 @@
             const file = new File([data.file], data.fileName)
             image.src = URL.createObjectURL(file)
             image.onload = (e) => URL.revokeObjectURL(image.src)
-            image.setAttribute('data-md5', data.md5)
             gallery.insertBefore(image, gallery.firstChild)
           }
 
