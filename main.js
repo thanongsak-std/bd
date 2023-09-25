@@ -21,7 +21,7 @@ function createWindow () {
   mainWindow.loadFile('desktop.html')
 
   // Open the DevTools.
-  mainWindow.webContents.openDevTools()
+  // mainWindow.webContents.openDevTools()
 
   return mainWindow
 }
