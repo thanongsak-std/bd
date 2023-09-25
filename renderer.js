@@ -5,8 +5,7 @@
  * `contextIsolation` is turned on. Use the contextBridge API in `preload.js`
  * to expose Node.js functionality from the main process.
  */
-const baseURL = 'https://thanongsak-std.github.io/bd/public'
-// const baseURL = 'file:///D:/Student%20Project/BD%20Project/public'
+const baseURL = 'https://thanongsak-std.github.io/bd'
 
 const gallery = document.getElementById('gallery')
 const openDirectory = document.getElementById('openDirectory')
@@ -19,7 +18,7 @@ const connections = []
 const filePaths = []
 
 peer.on('open', async (id) => {
-  const text = `${baseURL}/multiple.html#${id}`
+  const text = `${baseURL}/view.html#${id}`
   const blob = await getMultilpleQRCode(id)
   multipleImage.src = URL.createObjectURL(blob)
   multipleImage.onclick = (e) => {
@@ -85,7 +84,7 @@ async function downloadMultiple(conn) {
 }
 
 async function getMultilpleQRCode(id) {
-  const text = `${baseURL}/multiple.html#${id}`
+  const text = `${baseURL}/view.html#${id}`
   const buffer = await window['myAPI'].getQRCode(text)
   return new Blob([buffer])
 }
