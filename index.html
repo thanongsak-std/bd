@@ -3,18 +3,20 @@
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Backdrop Booth</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <style type="text/tailwindcss">#gallery img { @apply rounded; }</style>
   </head>
-  <body class="bg-white"> <!-- Change the class to "bg-white" for a white background -->
-    <img src="IMG/Scan_Top.gif" alt="" class="m-auto">
-    <div class="min-h-screen m-auto max-w-4xl grid grid-cols-3 gap-4 p-4" id="gallery"></div>
-    <img src="" alt="" id="toMultipleImage" class="fixed top-0 right-0 hidden">
+
+  <body class="bg-white">
+    <img src="IMG/Scan_Top.gif" class="m-auto">
+
+    <div class="m-auto max-w-4xl columns-[10rem] gap-4 space-y-4 p-4" id="gallery"></div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/peerjs/1.4.7/peerjs.min.js"></script>
     <script>
       const peer = new peerjs.Peer()
       const gallery = document.getElementById('gallery')
-      const toMultipleImage = document.getElementById('toMultipleImage')
 
       peer.on('open', () => {
         const id = location.hash.substring(1)
