@@ -18,7 +18,7 @@ const connections = []
 const filePaths = []
 
 peer.on('open', async (id) => {
-  const text = `${baseURL}/view.html#${id}`
+  const text = `${baseURL}/#${id}`
   const blob = await getMultilpleQRCode(id)
   multipleImage.src = URL.createObjectURL(blob)
   multipleImage.onclick = (e) => {
@@ -84,7 +84,7 @@ async function downloadMultiple(conn) {
 }
 
 async function getMultilpleQRCode(id) {
-  const text = `${baseURL}/view.html#${id}`
+  const text = `${baseURL}/#${id}`
   const buffer = await window['myAPI'].getQRCode(text)
   return new Blob([buffer])
 }
