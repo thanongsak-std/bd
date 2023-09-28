@@ -7,15 +7,12 @@
  */
 const { contextBridge, ipcRenderer } = require('electron')
 
-const myAPI = {
+const backend = {
   getServerUrl () {
     return ipcRenderer.invoke('getServerUrl')
   },
   selectFolder () {
     return ipcRenderer.invoke('selectFolder')
-  },
-  watch (cb) {
-    return ipcRenderer.on('watch', cb)
   },
   getOriginImage (filePath) {
     return ipcRenderer.invoke('getOriginImage', filePath)
@@ -23,32 +20,12 @@ const myAPI = {
   getThumbnailImage (filePath) {
     return ipcRenderer.invoke('getThumbnailImage', filePath)
   },
-
-  getBasename: (filePath) => {
-    return ipcRenderer.invoke('get:basename', filePath)
+  getQRCodeImage (text, opts = null) {
+    return ipcRenderer.invoke('getQRCodeImage', text, opts)
   },
-  getThumbnail: async (filePath, text = null) => {
-    const buffer = await ipcRenderer.invoke('get:thumbnail', filePath, text)
-    const fileName = myAPI.getBasename(filePath)
-    return new File([buffer], fileName)
+  watch (listener) {
+    return ipcRenderer.on('watch', listener)
   },
-  getThumbnailURL: async (filePath, text = null) => {
-    return URL.createObjectURL(await myAPI.getThumbnail(filePath, text))
-  },
-  getImage: async (filePath) => {
-    const buffer = await ipcRenderer.invoke('get:image', filePath)
-    const fileName = myAPI.getBasename(filePath)
-    return new File([buffer], fileName)
-  },
-  getImageURL: async (filePath) => {
-    return URL.createObjectURL(await myAPI.getImage(filePath))
-  },
-  md5: (data) => {
-    return ipcRenderer.invoke('md5', data)
-  },
-  getQRCode: async (text, opts = null) => {
-    return ipcRenderer.invoke('get:qrcode', text, opts)
-  }
 }
 
-contextBridge.exposeInMainWorld('myAPI', myAPI)
+contextBridge.exposeInMainWorld('backend', backend)

@@ -8,7 +8,7 @@
 const DEBUG = true
 
 const baseURL = () => DEBUG
-  ? window['myAPI'].getServerUrl()
+  ? window['backend'].getServerUrl()
   : 'https://thanongsak-std.github.io/bd'
 
 const app = {
@@ -21,8 +21,8 @@ const app = {
     })
 
     function selectFolder() {
-      Object.keys(images).forEach(deleteGalleryImage)
-      return window['myAPI'].selectFolder()
+      Object.keys(galleryImageStore).forEach(deleteGalleryImage)
+      return window['backend'].selectFolder()
     }
 
     function clipOnlineObjText() {
@@ -35,8 +35,8 @@ const app = {
 
     async function addGelleryImage(filePath) {
       if (notImageFile(filePath)) return
-      const origin = await window['myAPI'].getOriginImage(filePath)
-      const thumbnail = await window['myAPI'].getThumbnailImage(filePath)
+      const origin = await window['backend'].getOriginImage(filePath)
+      const thumbnail = await window['backend'].getThumbnailImage(filePath)
       const thumbnailUrl = URL.createObjectURL(new Blob([thumbnail]))
       galleryImageStore[filePath] = { filePath, origin, thumbnail, thumbnailUrl }
     }
@@ -46,7 +46,7 @@ const app = {
       delete galleryImageStore[filePath]
     }
 
-    window['myAPI'].watch((_, { event, filePath }) => {
+    window['backend'].watch((_, { event, filePath }) => {
       if (event === 'add') addGelleryImage(filePath)
       if (event === 'unlink') deleteGalleryImage(filePath)
     })
@@ -54,7 +54,7 @@ const app = {
     const peer = new peerjs.Peer(null, { debug: DEBUG ? 3 : 2 })
     peer.on('open', async (id) => {
       onlineObj.text = `${await baseURL()}#${id}`
-      const buffer = await window['myAPI'].getQRCode(onlineObj.text)
+      const buffer = await window['backend'].getQRCodeImage(onlineObj.text)
       onlineObj.qrcode = URL.createObjectURL(new Blob([buffer]))
     })
 

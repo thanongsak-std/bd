@@ -58,28 +58,7 @@ app.whenReady().then(() => {
     return loadImage(filePath).resize(300, 300).toBuffer()
   })
 
-  ipcMain.handle('get:thumbnail', async (event, filePath, text = null) => {
-    const image = sharp(filePath).resize(500, 500).withMetadata()
-    if (text) image.composite([{
-      input: await QRCode.toBuffer(text, { margin: 2, scale: 3 }),
-      gravity: sharp.gravity.northeast,
-    }])
-    return image.toBuffer()
-  })
-
-  ipcMain.handle('get:basename', (event, filePath) => {
-    return path.basename(filePath)
-  })
-
-  ipcMain.handle('get:image', (event, filePath) => {
-    return sharp(filePath).withMetadata().toBuffer()
-  })
-
-  ipcMain.handle('md5', (event, data) => {
-    return crypto.createHash('md5').update(data).digest('hex')
-  })
-
-  ipcMain.handle('get:qrcode', (event, text, opts = null) => {
+  ipcMain.handle('getQRCodeImage', (event, text, opts = null) => {
     return QRCode.toBuffer(text, opts)
   })
 })
