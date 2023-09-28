@@ -17,6 +17,32 @@ const app = {
     const onlineObj = Vue.reactive({ text: '', qrcode: '' })
     const galleryImageStore = Vue.reactive({})
 
+    const previewImage = Vue.reactive({
+      filePath: '',
+      url: '',
+      open (filePath) {
+        const obj = galleryImageStore[filePath]
+        if (obj.origin === null) {
+          sendMessage({ event: 'origin', filePath })
+          const stop = Vue.watch(() => obj.originUrl, (x) => stop(this.url = x))
+        }
+        this.filePath = filePath
+        this.url = obj.originUrl || obj.thumbnailUrl
+      },
+      close () {
+        this.filePath = ''
+        this.url = ''
+      },
+      download () {
+        const a = document.createElement('a')
+        a.href = this.url
+        a.download = `untitled.${this.filePath.split('.').reverse()?.[0]}`
+        document.body.appendChild(a)
+        a.click()
+        document.body.removeChild(a)
+      }
+    })
+
     const galleryImages = Vue.computed(() => {
       return Object.values(galleryImageStore).reverse()
     })
@@ -42,9 +68,10 @@ const app = {
     async function addGelleryImage(filePath) {
       if (notImageFile(filePath)) return
       const origin = await window['backend'].getOriginImage(filePath)
+      const originUrl = URL.createObjectURL(new Blob([thumbnail]))
       const thumbnail = await window['backend'].getThumbnailImage(filePath)
       const thumbnailUrl = URL.createObjectURL(new Blob([thumbnail]))
-      galleryImageStore[filePath] = { filePath, origin, thumbnail, thumbnailUrl }
+      galleryImageStore[filePath] = { filePath, origin, originUrl, thumbnail, thumbnailUrl }
       sendMessage({ event: 'add', filePath, thumbnail })
     }
 
@@ -84,38 +111,14 @@ const app = {
       if (event === 'add') addGelleryImage(filePath)
       if (event === 'unlink') deleteGalleryImage(filePath)
     })
-    const previewImage = Vue.reactive({
-      filePath: '',
-      url: '',
-      open (filePath) {
-        const obj = galleryImageStore[filePath]
-        if (obj.origin === null) {
-          sendMessage({ event: 'origin', filePath })
-          const stop = Vue.watch(() => obj.originUrl, (x) => stop(this.url = x))
-        }
-        this.filePath = filePath
-        this.url = obj.originUrl || obj.thumbnailUrl
-      },
-      close () {
-        this.filePath = ''
-        this.url = ''
-      },
-      download () {
-        const a = document.createElement('a')
-        a.href = this.url
-        a.download = `untitled.${this.filePath.split('.').reverse()?.[0]}`
-        document.body.appendChild(a)
-        a.click()
-        document.body.removeChild(a)
-      }
-    })
+
     return {
       onlineObj,
       galleryImages,
+      previewImage,
       selectFolder,
       clipOnlineObjText,
       peer,
-      previewImage,
     }
   }
 }
