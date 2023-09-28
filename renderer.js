@@ -13,6 +13,7 @@ const baseURL = () => DEBUG
 
 const app = {
   setup () {
+    const peer = new peerjs.Peer(null, { debug: 2 })
     const onlineObj = Vue.reactive({ text: '', qrcode: '' })
     const galleryImageStore = Vue.reactive({})
 
@@ -33,29 +34,55 @@ const app = {
       return /\.(jpeg|jpg|gif|png)$/.test(filePath) == false
     }
 
+    function sendMessage(message) {
+      const send = (conn) => conn.forEach(x => x.send(message))
+      return Object.values(peer.connections).forEach(send)
+    }
+
     async function addGelleryImage(filePath) {
       if (notImageFile(filePath)) return
       const origin = await window['backend'].getOriginImage(filePath)
       const thumbnail = await window['backend'].getThumbnailImage(filePath)
       const thumbnailUrl = URL.createObjectURL(new Blob([thumbnail]))
       galleryImageStore[filePath] = { filePath, origin, thumbnail, thumbnailUrl }
+      sendMessage({ event: 'add', filePath, thumbnail })
     }
 
-    async function deleteGalleryImage(filePath) {
+    function deleteGalleryImage(filePath) {
       if (notImageFile(filePath)) return
       delete galleryImageStore[filePath]
+      sendMessage({ event: 'unlink', filePath })
     }
+
+    function peerConnectionSyncImage(conn) {
+      Object.values(galleryImageStore).forEach(({ filePath, thumbnail }) => {
+        return conn.send({ event: 'add', filePath, thumbnail })
+      })
+    }
+
+    function peerGetOriginImage(conn, { filePath }) {
+      const { origin } = galleryImageStore[filePath]
+      conn.send({ event: 'origin', filePath, origin })
+    }
+
+    function peerConnectionAction(conn, data) {
+      if (data.event === 'origin') peerGetOriginImage(conn, data)
+    }
+
+    peer.on('open', async (peerId) => {
+      onlineObj.text = `${await baseURL()}#${peerId}`
+      const buffer = await window['backend'].getQRCodeImage(onlineObj.text)
+      onlineObj.qrcode = URL.createObjectURL(new Blob([buffer]))
+    })
+
+    peer.on('connection', (conn) => {
+      conn.on('open', () => peerConnectionSyncImage(conn))
+      conn.on('data', (data) => peerConnectionAction(conn, data))
+    })
 
     window['backend'].watch((_, { event, filePath }) => {
       if (event === 'add') addGelleryImage(filePath)
       if (event === 'unlink') deleteGalleryImage(filePath)
-    })
-
-    const peer = new peerjs.Peer(null, { debug: DEBUG ? 3 : 2 })
-    peer.on('open', async (id) => {
-      onlineObj.text = `${await baseURL()}#${id}`
-      const buffer = await window['backend'].getQRCodeImage(onlineObj.text)
-      onlineObj.qrcode = URL.createObjectURL(new Blob([buffer]))
     })
 
     return {
@@ -68,4 +95,4 @@ const app = {
   }
 }
 
-Vue.createApp(app).mount('#app')
+window.myApp = Vue.createApp(app).mount('#app')

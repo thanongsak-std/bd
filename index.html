@@ -8,55 +8,105 @@
   </head>
 
   <body>
-    <div id="app">
-      <img src="IMG/Scan_Top.gif" class="m-auto">
+    <div class="h-screen flex flex-col" id="app">
+      <div class="flex items-stretch justify-between max-h-64 [&_img]:h-full">
+        <div><img src="IMG/Scan_Top.gif"></div>
+      </div>
 
-      <div class="m-auto columns-[10rem] gap-4 space-y-4 p-4"></div>
+      <div class="flex-grow overflow-y-scroll p-4 grid grid-cols-[repeat(auto-fit,minmax(14rem,1fr))] gap-4">
+        <div v-for="item in galleryImages" @click="previewImage.open(item.filePath)">
+          <img :src="item.thumbnailUrl" class="w-full rounded cursor-pointer">
+        </div>
+      </div>
 
-      {{ message }}
+      <div v-if="previewImage.filePath" class="fixed inset-0 z-10 bg-black/90 p-4 flex flex-col gap-4">
+        <div class="flex justify-center overflow-hidden"><img :src="previewImage.url" class="h-full rounded"></div>
+
+        <div class="m-auto w-full max-w-[40rem] grid grid-cols-2 gap-4 [&_button]:py-4 [&_button]:rounded text-white">
+          <button class="bg-red-500 hover:bg-red-700" @click="previewImage.close()">close</button>
+          <button class="bg-blue-500 hover:bg-blue-700" @click="previewImage.download()">download</button>
+        </div>
+      </div>
+
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/3.3.4/vue.global.prod.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/peerjs/1.5.1/peerjs.min.js"></script>
 
     <script>
-
       const app = {
         setup() {
-          const peer = Vue.ref(null)
+          const peer = new Peer(null, { debug: 2 })
+          const galleryImageStore = Vue.reactive({})
 
-          return { peer }
-        },
-        created() {
-          this.connect()
-        },
-        connect() {
-          this.peer = new Peer(null, { debug: 2 })
-          this.peer.on('open', (peerId) => {
+          const previewImage = Vue.reactive({
+            filePath: '',
+            url: '',
+            open (filePath) {
+              const obj = galleryImageStore[filePath]
+              if (obj.origin === null) {
+                sendMessage({ event: 'origin', filePath })
+                const stop = Vue.watch(() => obj.originUrl, (x) => stop(this.url = x))
+              }
+              this.filePath = filePath
+              this.url = obj.originUrl || obj.thumbnailUrl
+            },
+            close () {
+              this.filePath = ''
+              this.url = ''
+            },
+            download () {
+              const a = document.createElement('a')
+              a.href = this.url
+              a.download = `untitled.${this.filePath.split('.').reverse()?.[0]}`
+              document.body.appendChild(a)
+              a.click()
+              document.body.removeChild(a)
+            }
+          })
+
+          const galleryImages = Vue.computed(() => {
+            return Object.values(galleryImageStore).reverse()
+          })
+
+          function sendMessage(message) {
+            const send = (conn) => conn.forEach(x => x.send(message))
+            return Object.values(peer.connections).forEach(send)
+          }
+
+          function addGelleryImage({ filePath, thumbnail }) {
+            const thumbnailUrl = URL.createObjectURL(new Blob([thumbnail]))
+            const obj = { filePath, thumbnail, thumbnailUrl }
+            galleryImageStore[filePath] = { ...obj, origin: null, originUrl: '' }
+          }
+
+          function deleteGalleryImage({ filePath }) {
+            delete galleryImageStore[filePath]
+          }
+
+          function updateOriginGalleryImage({ filePath, origin }) {
+            const originUrl = URL.createObjectURL(new Blob([origin]))
+            galleryImageStore[filePath].origin = origin
+            galleryImageStore[filePath].originUrl = originUrl
+          }
+
+          function galleryImageAction(data) {
+            if (data.event === 'add') addGelleryImage(data)
+            if (data.event === 'unlink') deleteGalleryImage(data)
+            if (data.event === 'origin') updateOriginGalleryImage(data)
+          }
+
+          peer.on('open', (peerId) => {
             const remotePeerId = location.hash.substring(1)
             const conn = peer.connect(remotePeerId, { reliable: true })
-            conn.on('data', (data) => console.log('data: ', data))
+            conn.on('data', (data) => galleryImageAction(data))
           })
-        }
+
+          return { galleryImages, previewImage, peer }
+        },
       }
 
-      Vue.createApp(app).mount('#app')
-
-      // dataConnection.on('open', () => dataConnection.send('multiple: '))
-      // dataConnection.on('data', (data) => {
-      //   if (data.type == 'add') {
-      //     const image = document.createElement('img')
-      //     const file = new File([data.file], data.fileName)
-      //     image.src = URL.createObjectURL(file)
-      //     image.onload = (e) => URL.revokeObjectURL(image.src)
-      //     gallery.insertBefore(image, gallery.firstChild)
-      //   }
-
-      //   if (data.type == 'toMultipleQRCode') {
-      //     const blob = new Blob([data.blob])
-      //     toMultipleImage.src = URL.createObjectURL(blob)
-      //   }
-      // })
+      window.myApp = Vue.createApp(app).mount('#app')
     </script>
 
   </body>

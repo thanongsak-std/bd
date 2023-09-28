@@ -6,6 +6,7 @@
     <title>Backdrop Booth</title>
     <script src="https://cdn.tailwindcss.com"></script>
   </head>
+
   <body>
     <div class="h-screen flex flex-col" id="app">
       <div class="flex items-stretch justify-between max-h-64 [&_img]:h-full">
@@ -16,14 +17,17 @@
         <div><img src="IMG/Scan_Me.gif"></div>
       </div>
 
-      <div class="flex-grow overflow-y-scroll p-4 grid grid-cols-[repeat(auto-fit,minmax(14rem,1fr))] gap-4" id="gallery">
-        <img v-for="item in galleryImages" :src="item.thumbnailUrl" class="w-full rounded">
+      <div class="flex-grow overflow-y-scroll p-4 grid grid-cols-[repeat(auto-fit,minmax(14rem,1fr))] gap-4">
+        <div v-for="item in galleryImages">
+          <img :src="item.thumbnailUrl" class="w-full rounded cursor-pointer">
+        </div>
       </div>
 
-      <div class="fixed bottom-4 left-0 right-0 text-center">
+      <div class="fixed z-10 bottom-4 left-0 right-0 text-center">
         <button class="bg-red-500/75 hover:bg-red-500
           text-white rounded px-4 py-2" @click="selectFolder()">เลือกโฟลเดอร์</button>
       </div>
+
     </div>
 
     <!-- You can also require other files to run in this process -->
