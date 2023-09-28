@@ -19,8 +19,8 @@
       </div>
 
       <div class="flex-grow overflow-y-scroll p-4 grid grid-cols-[repeat(auto-fit,minmax(14rem,1fr))] gap-4">
-        <div v-for="item in galleryImages">
-          <img :src="item.thumbnailUrl" class="w-full rounded">
+        <div v-for="item in galleryImages" @click="previewImage.open(item.filePath)">
+          <img :src="item.thumbnailUrl" class="w-full rounded cursor-pointer">
         </div>
       </div>
 
