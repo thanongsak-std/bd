@@ -48,7 +48,7 @@ function createWindow () {
 
   mainWindow.loadURL(getServerUrl()+'/desktop.html')
 
-  mainWindow.webContents.openDevTools()
+  // mainWindow.webContents.openDevTools()
 
   return mainWindow
 }
