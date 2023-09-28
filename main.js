@@ -1,12 +1,10 @@
 process.env['ELECTRON_DISABLE_SECURITY_WARNINGS'] = 'true';
 
-// Modules to control application life and create native browser window
 const { app, BrowserWindow, dialog, ipcMain } = require('electron')
 const path = require('path')
 const chokidar = require('chokidar')
 const sharp = require('sharp')
 const QRCode = require('qrcode')
-const crypto = require('crypto')
 const express = require('express')
 
 const expressApp = express()
@@ -18,7 +16,6 @@ function getServerUrl() {
 }
 
 function createWindow () {
-  // Create the browser window.
   const mainWindow = new BrowserWindow({
     width: 1000,
     height: 800,
@@ -28,23 +25,16 @@ function createWindow () {
     }
   })
 
-  // and load the index.html of the app.
   mainWindow.loadURL(getServerUrl()+'/desktop.html')
 
-  // Open the DevTools.
   mainWindow.webContents.openDevTools()
 
   return mainWindow
 }
 
-// This method will be called when Electron has finished
-// initialization and is ready to create browser windows.
-// Some APIs can only be used after this event occurs.
 app.whenReady().then(() => {
   let mainWindow = createWindow()
   let watcher = new chokidar.FSWatcher()
-
-  app.on('activate', () => mainWindow === null && createWindow())
 
   ipcMain.handle('getServerUrl', () => getServerUrl())
 
@@ -61,13 +51,6 @@ app.whenReady().then(() => {
   ipcMain.handle('getQRCodeImage', (event, text, opts = null) => {
     return QRCode.toBuffer(text, opts)
   })
-})
-
-// Quit when all windows are closed, except on macOS. There, it's common
-// for applications and their menu bar to stay active until the user quits
-// explicitly with Cmd + Q.
-app.on('window-all-closed', function () {
-  if (process.platform !== 'darwin') app.quit()
 })
 
 async function selectFolder(mainWindow, watcher) {
