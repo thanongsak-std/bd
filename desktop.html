@@ -3,38 +3,32 @@
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="Content-Security-Policy" content="script-src 'self' https://cdn.tailwindcss.com https://cdnjs.cloudflare.com">
     <title>Backdrop Booth</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <style>#gallery img { width: 100%; } #previewImage img { max-height: 100%; }</style>
   </head>
   <body>
-    <div class="h-screen flex flex-col">
-      <div class="bg-white flex justify-center">
-        <img src="IMG/Scan_Top.gif" width="750" height="300">
+    <div class="h-screen flex flex-col" id="app">
+      <div class="flex items-stretch justify-between max-h-64 [&_img]:h-full">
+        <div><img src="IMG/Scan.gif"></div>
+        <div class="shrink-0 cursor-pointer">
+          <img :src="onlineObj.qrcode"  @click="clipOnlineObjText()">
+        </div>
+        <div><img src="IMG/Scan_Me.gif"></div>
       </div>
 
-      <div 
-        class="bg-white flex justify-center"> 
-        <img src="IMG/Scan.gif" width="600" height="200">
-        <img src="" id="multipleImage" width="200" height="200">
-        <img src="IMG/Scan_Me.gif" width="600" height="200">
+      <div class="flex-grow overflow-y-scroll p-4 grid grid-cols-[repeat(auto-fit,minmax(14rem,1fr))] gap-4" id="gallery">
+        <img v-for="item in images" :src="item.thumbnailUrl" class="w-full rounded">
       </div>
 
-      <div class="flex-grow bg-white overflow-y-scroll columns-[10rem] gap-4 space-y-4 p-4" id="gallery"></div>
-
-      <div><img src="IMG/Thanongsak.jpg" height="5"></div>
-
-      <div class="flex gap-4 bg-gray-300">
-        <input type="text" id="directoryPath" readonly class="flex-grow px-4 outline-none">
-        <button id="openDirectory" class="bg-white hover:bg-gray-300 p-1">Select Folder</button>
+      <div class="fixed bottom-4 left-0 right-0 text-center">
+        <button class="bg-red-500/75 hover:bg-red-500
+          text-white rounded px-4 py-2" @click="selectFolder()">เลือกโฟลเดอร์</button>
       </div>
     </div>
 
-    <div id="previewImage" class="fixed inset-0 bg-black/[.8] flex items-center justify-center p-2 hidden"><img src="" alt=""></div>
-
     <!-- You can also require other files to run in this process -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/peerjs/1.4.7/peerjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/3.3.4/vue.global.prod.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/peerjs/1.5.1/peerjs.min.js"></script>
     <script src="renderer.js"></script>
   </body>
 </html>

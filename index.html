@@ -5,49 +5,59 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Backdrop Booth</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <style type="text/tailwindcss">#gallery img { @apply rounded; }</style>
   </head>
 
-  <body class="bg-white">
-    <img src="IMG/Scan_Top.gif" class="m-auto">
+  <body>
+    <div id="app">
+      <img src="IMG/Scan_Top.gif" class="m-auto">
 
-    <div class="m-auto max-w-4xl columns-[10rem] gap-4 space-y-4 p-4" id="gallery"></div>
+      <div class="m-auto columns-[10rem] gap-4 space-y-4 p-4"></div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/peerjs/1.4.7/peerjs.min.js"></script>
+      {{ message }}
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/3.3.4/vue.global.prod.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/peerjs/1.5.1/peerjs.min.js"></script>
+
     <script>
-      const peer = new peerjs.Peer()
-      const gallery = document.getElementById('gallery')
 
-      peer.on('open', () => {
-        const id = location.hash.substring(1)
-        const dataConnection = peer.connect(id, { reliable: true })
-        dataConnection.on('open', () => dataConnection.send('multiple: '))
-        dataConnection.on('data', (data) => {
-          if (data.type == 'add') {
-            const image = document.createElement('img')
-            const file = new File([data.file], data.fileName)
-            image.src = URL.createObjectURL(file)
-            image.onload = (e) => URL.revokeObjectURL(image.src)
-            gallery.insertBefore(image, gallery.firstChild)
-          }
+      const app = {
+        setup() {
+          const peer = Vue.ref(null)
 
-          if (data.type == 'remove') {
-            const selector = `#gallery img[data-md5="${data.md5}"]`
-            const image = document.querySelector(selector)
-            image.parentNode.removeChild(image)
-          }
+          return { peer }
+        },
+        created() {
+          this.connect()
+        },
+        connect() {
+          this.peer = new Peer(null, { debug: 2 })
+          this.peer.on('open', (peerId) => {
+            const remotePeerId = location.hash.substring(1)
+            const conn = peer.connect(remotePeerId, { reliable: true })
+            conn.on('data', (data) => console.log('data: ', data))
+          })
+        }
+      }
 
-          if (data.type == 'removeAll') {
-            while (gallery.firstChild)
-              gallery.removeChild(gallery.firstChild)
-          }
+      Vue.createApp(app).mount('#app')
 
-          if (data.type == 'toMultipleQRCode') {
-            const blob = new Blob([data.blob])
-            toMultipleImage.src = URL.createObjectURL(blob)
-          }
-        })
-      })
+      // dataConnection.on('open', () => dataConnection.send('multiple: '))
+      // dataConnection.on('data', (data) => {
+      //   if (data.type == 'add') {
+      //     const image = document.createElement('img')
+      //     const file = new File([data.file], data.fileName)
+      //     image.src = URL.createObjectURL(file)
+      //     image.onload = (e) => URL.revokeObjectURL(image.src)
+      //     gallery.insertBefore(image, gallery.firstChild)
+      //   }
+
+      //   if (data.type == 'toMultipleQRCode') {
+      //     const blob = new Blob([data.blob])
+      //     toMultipleImage.src = URL.createObjectURL(blob)
+      //   }
+      // })
     </script>
+
   </body>
 </html>

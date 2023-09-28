@@ -1,3 +1,5 @@
+process.env['ELECTRON_DISABLE_SECURITY_WARNINGS'] = 'true';
+
 // Modules to control application life and create native browser window
 const { app, BrowserWindow, dialog, ipcMain } = require('electron')
 const path = require('path')
@@ -5,6 +7,15 @@ const chokidar = require('chokidar')
 const sharp = require('sharp')
 const QRCode = require('qrcode')
 const crypto = require('crypto')
+const express = require('express')
+
+const expressApp = express()
+expressApp.use(express.static(__dirname))
+const expressServer = expressApp.listen(0, '127.0.0.1')
+
+function getServerUrl() {
+  return `http://127.0.0.1:${expressServer.address().port}`
+}
 
 function createWindow () {
   // Create the browser window.
@@ -18,10 +29,10 @@ function createWindow () {
   })
 
   // and load the index.html of the app.
-  mainWindow.loadFile('desktop.html')
+  mainWindow.loadURL(getServerUrl()+'/desktop.html')
 
   // Open the DevTools.
-  // mainWindow.webContents.openDevTools()
+  mainWindow.webContents.openDevTools()
 
   return mainWindow
 }
@@ -31,29 +42,20 @@ function createWindow () {
 // Some APIs can only be used after this event occurs.
 app.whenReady().then(() => {
   let mainWindow = createWindow()
-
-  app.on('activate', function () {
-    // On macOS it's common to re-create a window in the app when the
-    // dock icon is clicked and there are no other windows open.
-    if (BrowserWindow.getAllWindows().length === 0)
-      mainWindow = createWindow()
-  })
-
-  ipcMain.handle('dialog:openDirectory', async () => {
-    const { canceled, filePaths } = await dialog.showOpenDialog({
-      properties: ['openDirectory']
-    })
-    return canceled ? null : filePaths[0]
-  })
-
   let watcher = new chokidar.FSWatcher()
 
-  ipcMain.handle('set:directoryPath', (event, dirPath) => {
-    watcher.close()
-    watcher = chokidar.watch(dirPath, { depth: 0 })
-    watcher.on('all', (event, filePath) => {
-      mainWindow.webContents.send('watch', { event, filePath })
-    })
+  app.on('activate', () => mainWindow === null && createWindow())
+
+  ipcMain.handle('getServerUrl', () => getServerUrl())
+
+  ipcMain.handle('selectFolder', () => selectFolder(mainWindow, watcher))
+
+  ipcMain.handle('getOriginImage', (event, filePath) => {
+    return loadImage(filePath).toBuffer()
+  })
+
+  ipcMain.handle('getThumbnailImage', (event, filePath) => {
+    return loadImage(filePath).resize(300, 300).toBuffer()
   })
 
   ipcMain.handle('get:thumbnail', async (event, filePath, text = null) => {
@@ -88,3 +90,22 @@ app.whenReady().then(() => {
 app.on('window-all-closed', function () {
   if (process.platform !== 'darwin') app.quit()
 })
+
+async function selectFolder(mainWindow, watcher) {
+  const { canceled, filePaths } = await dialog.showOpenDialog({
+    properties: ['openDirectory']
+  })
+  if (canceled) { return }
+
+  watcher.close()
+  watcher = chokidar.watch(filePaths[0], { depth: 0 })
+  watcher.on('all', (event, filePath) => {
+    mainWindow.webContents.send('watch', { event, filePath })
+  })
+
+  return filePaths[0]
+}
+
+function loadImage(filePath) {
+  return sharp(filePath).withMetadata()
+}

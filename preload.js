@@ -8,15 +8,22 @@
 const { contextBridge, ipcRenderer } = require('electron')
 
 const myAPI = {
-  openDirectory: () => {
-    return ipcRenderer.invoke('dialog:openDirectory')
+  getServerUrl () {
+    return ipcRenderer.invoke('getServerUrl')
   },
-  setDirectoryPath: (directoryPath) => {
-    ipcRenderer.invoke('set:directoryPath', directoryPath)
+  selectFolder () {
+    return ipcRenderer.invoke('selectFolder')
   },
-  watch: (callback) => {
-    ipcRenderer.on('watch', callback)
+  watch (cb) {
+    return ipcRenderer.on('watch', cb)
   },
+  getOriginImage (filePath) {
+    return ipcRenderer.invoke('getOriginImage', filePath)
+  },
+  getThumbnailImage (filePath) {
+    return ipcRenderer.invoke('getThumbnailImage', filePath)
+  },
+
   getBasename: (filePath) => {
     return ipcRenderer.invoke('get:basename', filePath)
   },
