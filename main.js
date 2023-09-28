@@ -43,7 +43,8 @@ function createWindow () {
     autoHideMenuBar: true,
     webPreferences: {
       preload: path.join(__dirname, 'preload.js')
-    }
+    },
+    icon:'IMG/Backdrop_Booth_logo.png'
   })
 
   mainWindow.loadURL(getServerUrl()+'/desktop.html')
