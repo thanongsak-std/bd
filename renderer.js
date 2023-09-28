@@ -31,7 +31,7 @@ const app = {
     }
 
     function notImageFile(filePath) {
-      return /\.(jpeg|jpg|gif|png)$/.test(filePath) == false
+      return /\.(jpeg|jpg|gif|png)$/i.test(filePath) == false
     }
 
     function sendMessage(message) {
