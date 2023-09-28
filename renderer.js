@@ -5,24 +5,23 @@
  * `contextIsolation` is turned on. Use the contextBridge API in `preload.js`
  * to expose Node.js functionality from the main process.
  */
-const baseURL = async () => {
-  // return 'https://thanongsak-std.github.io/bd'
-  return await window['myAPI'].getServerUrl()
-}
+const DEBUG = true
+
+const baseURL = () => DEBUG
+  ? window['myAPI'].getServerUrl()
+  : 'https://thanongsak-std.github.io/bd'
 
 const app = {
   setup () {
     const onlineObj = Vue.reactive({ text: '', qrcode: '' })
-    const images = Vue.reactive([])
+    const galleryImageStore = Vue.reactive({})
 
-    const peer = new peerjs.Peer(null, { debug: 2 })
-    peer.on('open', async (id) => {
-      onlineObj.text = `${await baseURL()}#${id}`
-      const buffer = await window['myAPI'].getQRCode(onlineObj.text)
-      onlineObj.qrcode = URL.createObjectURL(new Blob([buffer]))
+    const galleryImages = Vue.computed(() => {
+      return Object.values(galleryImageStore).reverse()
     })
 
     function selectFolder() {
+      Object.keys(images).forEach(deleteGalleryImage)
       return window['myAPI'].selectFolder()
     }
 
@@ -36,19 +35,15 @@ const app = {
 
     async function addGelleryImage(filePath) {
       if (notImageFile(filePath)) return
-      console.log('addGelleryImage', filePath)
       const origin = await window['myAPI'].getOriginImage(filePath)
       const thumbnail = await window['myAPI'].getThumbnailImage(filePath)
-      const originUrl = URL.createObjectURL(new Blob([origin]))
       const thumbnailUrl = URL.createObjectURL(new Blob([thumbnail]))
-      images.push({ filePath, origin, thumbnail, originUrl, thumbnailUrl })
+      galleryImageStore[filePath] = { filePath, origin, thumbnail, thumbnailUrl }
     }
 
     async function deleteGalleryImage(filePath) {
       if (notImageFile(filePath)) return
-      console.log('deleteGalleryImage', filePath)
-      const start = images.findIndex(item => item.filePath == filePath)
-      if (start != -1) images.splice(start, 1)
+      delete galleryImageStore[filePath]
     }
 
     window['myAPI'].watch((_, { event, filePath }) => {
@@ -56,9 +51,16 @@ const app = {
       if (event === 'unlink') deleteGalleryImage(filePath)
     })
 
+    const peer = new peerjs.Peer(null, { debug: DEBUG ? 3 : 2 })
+    peer.on('open', async (id) => {
+      onlineObj.text = `${await baseURL()}#${id}`
+      const buffer = await window['myAPI'].getQRCode(onlineObj.text)
+      onlineObj.qrcode = URL.createObjectURL(new Blob([buffer]))
+    })
+
     return {
       onlineObj,
-      images,
+      galleryImages,
       selectFolder,
       clipOnlineObjText,
     }
