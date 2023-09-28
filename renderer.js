@@ -68,7 +68,7 @@ const app = {
     async function addGelleryImage(filePath) {
       if (notImageFile(filePath)) return
       const origin = await window['backend'].getOriginImage(filePath)
-      const originUrl = URL.createObjectURL(new Blob([thumbnail]))
+      const originUrl = URL.createObjectURL(new Blob([origin]))
       const thumbnail = await window['backend'].getThumbnailImage(filePath)
       const thumbnailUrl = URL.createObjectURL(new Blob([thumbnail]))
       galleryImageStore[filePath] = { filePath, origin, originUrl, thumbnail, thumbnailUrl }
