@@ -10,7 +10,7 @@
 
   <body>
     <div class="h-screen flex flex-col" id="app">
-      <div class="flex items-stretch justify-between max-h-64 [&_img]:h-full">
+      <div class="flex items-stretch justify-between max-h-48 [&_img]:h-full px-20 pt-5">
         <div><img src="IMG/Scan.gif"></div>
         <div class="shrink-0 cursor-pointer">
           <img :src="onlineObj.qrcode"  @click="clipOnlineObjText()">

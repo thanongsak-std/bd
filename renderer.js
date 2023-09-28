@@ -98,7 +98,7 @@ const app = {
 
     peer.on('open', async (peerId) => {
       onlineObj.text = `${await baseURL()}#${peerId}`
-      const buffer = await window['backend'].getQRCodeImage(onlineObj.text)
+      const buffer = await window['backend'].getQRCodeImage(onlineObj.text, { scale: 4 , margin: 2})
       onlineObj.qrcode = URL.createObjectURL(new Blob([buffer]))
     })
 
