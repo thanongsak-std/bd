@@ -15,9 +15,7 @@ app.whenReady().then(() => {
   let mainWindow = createWindow()
   let watcher = new chokidar.FSWatcher()
 
-  ipcMain.handle('getServerUrl', () => {
-    return `http://127.0.0.1:${expressServer.address().port}`
-  })
+  ipcMain.handle('getServerUrl', () => getServerUrl())
 
   ipcMain.handle('selectFolder', () => selectFolder(mainWindow, watcher))
 
@@ -33,6 +31,10 @@ app.whenReady().then(() => {
     return QRCode.toBuffer(text, opts)
   })
 })
+
+function getServerUrl() {
+  return `http://127.0.0.1:${expressServer.address().port}`
+}
 
 function createWindow () {
   const mainWindow = new BrowserWindow({

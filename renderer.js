@@ -63,6 +63,7 @@ const app = {
       galleryImages,
       selectFolder,
       clipOnlineObjText,
+      peer,
     }
   }
 }
