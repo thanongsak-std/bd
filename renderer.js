@@ -118,7 +118,6 @@ const app = {
       previewImage,
       selectFolder,
       clipOnlineObjText,
-      peer,
     }
   }
 }
