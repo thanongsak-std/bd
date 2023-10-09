@@ -1,5 +1,3 @@
-process.env['ELECTRON_DISABLE_SECURITY_WARNINGS'] = 'true';
-
 const { app, BrowserWindow, dialog, ipcMain } = require('electron')
 const path = require('path')
 const chokidar = require('chokidar')
@@ -44,7 +42,9 @@ function createWindow () {
     webPreferences: {
       preload: path.join(__dirname, 'preload.js')
     },
-    icon:'IMG/Backdrop_Booth_logo.png'
+    icon:'IMG/Backdrop_Booth_logo.png',
+    contextIsolation: false,
+    nodeIntegration: true
   })
 
   mainWindow.loadURL(getServerUrl()+'/desktop.html')
