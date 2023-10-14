@@ -4,6 +4,7 @@ const chokidar = require('chokidar')
 const sharp = require('sharp')
 const QRCode = require('qrcode')
 const express = require('express')
+const fs = require('fs')
 
 const expressApp = express()
 expressApp.use(express.static(__dirname))
@@ -61,7 +62,7 @@ async function selectFolder(mainWindow, watcher) {
   if (canceled) { return }
 
   watcher.close()
-  watcher = chokidar.watch(filePaths[0], { depth: 0 })
+  watcher = chokidar.watch(filePaths[0], { depth: 0, awaitWriteFinish: true })
   watcher.on('all', (event, filePath) => {
     mainWindow.webContents.send('watch', { event, filePath })
   })
