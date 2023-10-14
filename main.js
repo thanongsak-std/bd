@@ -4,7 +4,6 @@ const chokidar = require('chokidar')
 const sharp = require('sharp')
 const QRCode = require('qrcode')
 const express = require('express')
-const fs = require('fs')
 
 const expressApp = express()
 expressApp.use(express.static(__dirname))
@@ -28,6 +27,10 @@ app.whenReady().then(() => {
 
   ipcMain.handle('getQRCodeImage', (event, text, opts = null) => {
     return QRCode.toBuffer(text, opts)
+  })
+
+  ipcMain.handle('getBaseName', (event, filePath) => {
+    return path.basename(filePath)
   })
 })
 

@@ -59,7 +59,7 @@
             download () {
               const a = document.createElement('a')
               a.href = this.url
-              a.download = `untitled.${this.filePath.split('.').reverse()?.[0]}`
+              a.download = galleryImageStore[this.filePath].basename
               document.body.appendChild(a)
               a.click()
               document.body.removeChild(a)
@@ -75,9 +75,9 @@
             return Object.values(peer.connections).forEach(send)
           }
 
-          function addGelleryImage({ filePath, thumbnail }) {
+          function addGelleryImage({ filePath, thumbnail, basename }) {
             const thumbnailUrl = URL.createObjectURL(new Blob([thumbnail]))
-            const obj = { filePath, thumbnail, thumbnailUrl }
+            const obj = { filePath, thumbnail, thumbnailUrl, basename }
             galleryImageStore[filePath] = { ...obj, origin: null, originUrl: '' }
           }
 

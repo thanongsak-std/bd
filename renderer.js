@@ -72,7 +72,8 @@ const app = {
       const thumbnail = await window['backend'].getThumbnailImage(filePath)
       const thumbnailUrl = URL.createObjectURL(new Blob([thumbnail]))
       galleryImageStore[filePath] = { filePath, origin, originUrl, thumbnail, thumbnailUrl }
-      sendMessage({ event: 'add', filePath, thumbnail })
+      const basename = await window['backend'].getBaseName(filePath)
+      sendMessage({ event: 'add', filePath, thumbnail, basename })
     }
 
     function deleteGalleryImage(filePath) {

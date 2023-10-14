@@ -23,6 +23,9 @@ const backend = {
   getQRCodeImage (text, opts = null) {
     return ipcRenderer.invoke('getQRCodeImage', text, opts)
   },
+  getBaseName (filePath) {
+    return ipcRenderer.invoke('getBaseName', filePath)
+  },
   watch (listener) {
     return ipcRenderer.on('watch', listener)
   },
