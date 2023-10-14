@@ -14,6 +14,7 @@ const baseURL = () => DEBUG
 const app = {
   setup () {
     const peer = new peerjs.Peer(null, { debug: 2 })
+    const peerConnections = []
     const onlineObj = Vue.reactive({ text: '', qrcode: '' })
     const galleryImageStore = Vue.reactive({})
 
@@ -83,7 +84,7 @@ const app = {
 
     function sendMessage(message) {
       const send = (conn) => conn.forEach(x => x.send(message))
-      return Object.values(peer.connections).forEach(send)
+      return Object.values(peerConnections).forEach(send)
     }
 
     async function addGelleryImage(filePath) {
@@ -104,6 +105,7 @@ const app = {
     }
 
     function peerConnectionSyncImage(conn) {
+      peerConnections.push(conn)
       Object.values(galleryImageStore).forEach(({ filePath, basename, thumbnail }) => {
         return conn.send({ event: 'add', filePath, basename, thumbnail })
       })
