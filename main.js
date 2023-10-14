@@ -1,46 +1,24 @@
-process.env.ELECTRON_DISABLE_SECURITY_WARNINGS = true;
+process.env.ELECTRON_DISABLE_SECURITY_WARNINGS = true
 
-const { app, BrowserWindow, dialog, ipcMain } = require('electron')
-const path = require('path')
-const chokidar = require('chokidar')
-const sharp = require('sharp')
-const QRCode = require('qrcode')
-const express = require('express')
+const { app } = require('electron')
 
-const expressApp = express()
-expressApp.use(express.static(__dirname))
-const expressServer = expressApp.listen(0, '127.0.0.1')
+app.whenReady().then(async () => {
+  const { BrowserWindow, dialog, ipcMain } = require('electron')
+  const path = require('path')
+  const QRCode = require('qrcode')
+  const chokidar = require('chokidar')
+  const sharp = require('sharp')
+  const express = require('express')
 
-app.whenReady().then(() => {
-  let mainWindow = createWindow()
-  let watcher = new chokidar.FSWatcher()
-
-  ipcMain.handle('getServerUrl', () => getServerUrl())
-
-  ipcMain.handle('selectFolder', () => selectFolder(mainWindow, watcher))
-
-  ipcMain.handle('getOriginImage', (event, filePath) => {
-    return loadImage(filePath).toBuffer()
+  const expressApp = express()
+  expressApp.use(express.static(__dirname))
+  const expressServer = await new Promise((resolve) => {
+    const self = expressApp.listen(0, '127.0.0.1', () => resolve(self))
   })
 
-  ipcMain.handle('getThumbnailImage', (event, filePath) => {
-    return loadImage(filePath).resize(300, 300).toBuffer()
-  })
+  const loadImage = (filePath) => sharp(filePath).withMetadata()
+  const getServerUrl = () => `http://127.0.0.1:${expressServer.address().port}`
 
-  ipcMain.handle('getQRCodeImage', (event, text, opts = null) => {
-    return QRCode.toBuffer(text, opts)
-  })
-
-  ipcMain.handle('getBaseName', (event, filePath) => {
-    return path.basename(filePath)
-  })
-})
-
-function getServerUrl() {
-  return `http://127.0.0.1:${expressServer.address().port}`
-}
-
-function createWindow () {
   const mainWindow = new BrowserWindow({
     width: 1500,
     height: 1000,
@@ -57,24 +35,39 @@ function createWindow () {
 
   // mainWindow.webContents.openDevTools()
 
-  return mainWindow
-}
+  let watcher = new chokidar.FSWatcher()
 
-async function selectFolder(mainWindow, watcher) {
-  const { canceled, filePaths } = await dialog.showOpenDialog({
-    properties: ['openDirectory']
+  ipcMain.handle('getServerUrl', () => getServerUrl())
+
+  ipcMain.handle('selectFolder', async () => {
+    const { canceled, filePaths } = await dialog.showOpenDialog({
+      properties: ['openDirectory']
+    })
+    if (canceled) { return }
+
+    watcher.close()
+    watcher = chokidar.watch(filePaths[0], { depth: 0, awaitWriteFinish: true })
+    watcher.on('all', (event, filePath) => {
+      mainWindow.webContents.send('watch', { event, filePath })
+    })
+
+    return filePaths[0]
   })
-  if (canceled) { return }
 
-  watcher.close()
-  watcher = chokidar.watch(filePaths[0], { depth: 0, awaitWriteFinish: true })
-  watcher.on('all', (event, filePath) => {
-    mainWindow.webContents.send('watch', { event, filePath })
+  ipcMain.handle('getOriginImage', (event, filePath) => {
+    return loadImage(filePath).toBuffer()
   })
 
-  return filePaths[0]
-}
+  ipcMain.handle('getThumbnailImage', (event, filePath) => {
+    return loadImage(filePath).resize(300, 300).toBuffer()
+  })
 
-function loadImage(filePath) {
-  return sharp(filePath).withMetadata()
-}
+  ipcMain.handle('getQRCodeImage', (event, text, opts = null) => {
+    return QRCode.toBuffer(text, opts)
+  })
+
+  ipcMain.handle('getBaseName', (event, filePath) => {
+    return path.basename(filePath)
+  })
+
+})
