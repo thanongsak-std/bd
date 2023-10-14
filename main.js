@@ -3,11 +3,8 @@ process.env.ELECTRON_DISABLE_SECURITY_WARNINGS = true
 const { app } = require('electron')
 
 app.whenReady().then(async () => {
-  const { BrowserWindow, dialog, ipcMain } = require('electron')
+  const { BrowserWindow } = require('electron')
   const path = require('path')
-  const QRCode = require('qrcode')
-  const chokidar = require('chokidar')
-  const sharp = require('sharp')
   const express = require('express')
 
   const expressApp = express()
@@ -16,7 +13,6 @@ app.whenReady().then(async () => {
     const self = expressApp.listen(0, '127.0.0.1', () => resolve(self))
   })
 
-  const loadImage = (filePath) => sharp(filePath).withMetadata()
   const getServerUrl = () => `http://127.0.0.1:${expressServer.address().port}`
 
   const mainWindow = new BrowserWindow({
@@ -34,6 +30,13 @@ app.whenReady().then(async () => {
   mainWindow.loadURL(getServerUrl()+'/desktop.html')
 
   // mainWindow.webContents.openDevTools()
+
+  const { dialog, ipcMain } = require('electron')
+  const QRCode = require('qrcode')
+  const chokidar = require('chokidar')
+  const sharp = require('sharp')
+
+  const loadImage = (filePath) => sharp(filePath).withMetadata()
 
   let watcher = new chokidar.FSWatcher()
 
