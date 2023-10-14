@@ -36,7 +36,7 @@ const app = {
       download () {
         const a = document.createElement('a')
         a.href = this.url
-        a.download = `untitled.${this.filePath.split('.').reverse()?.[0]}`
+        a.download = galleryImageStore[this.filePath].basename
         document.body.appendChild(a)
         a.click()
         document.body.removeChild(a)
@@ -67,13 +67,13 @@ const app = {
 
     async function addGelleryImage(filePath) {
       if (notImageFile(filePath)) return
+      const basename = await window['backend'].getBaseName(filePath)
       const origin = await window['backend'].getOriginImage(filePath)
       const originUrl = URL.createObjectURL(new Blob([origin]))
       const thumbnail = await window['backend'].getThumbnailImage(filePath)
       const thumbnailUrl = URL.createObjectURL(new Blob([thumbnail]))
-      galleryImageStore[filePath] = { filePath, origin, originUrl, thumbnail, thumbnailUrl }
-      const basename = await window['backend'].getBaseName(filePath)
-      sendMessage({ event: 'add', filePath, thumbnail, basename })
+      galleryImageStore[filePath] = { filePath, basename, origin, originUrl, thumbnail, thumbnailUrl }
+      sendMessage({ event: 'add', filePath, basename, thumbnail })
     }
 
     function deleteGalleryImage(filePath) {
@@ -83,8 +83,8 @@ const app = {
     }
 
     function peerConnectionSyncImage(conn) {
-      Object.values(galleryImageStore).forEach(({ filePath, thumbnail }) => {
-        return conn.send({ event: 'add', filePath, thumbnail })
+      Object.values(galleryImageStore).forEach(({ filePath, basename, thumbnail }) => {
+        return conn.send({ event: 'add', filePath, basename, thumbnail })
       })
     }
 
