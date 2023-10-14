@@ -47,7 +47,28 @@ const app = {
       return Object.values(galleryImageStore).reverse()
     })
 
-    function selectFolder() {
+    const watchQueue = {
+      stack: [],
+      padding: Promise.resolve(),
+      async run () {
+        try {
+          await this.padding
+        } finally {
+          return (cb = this.stack.shift()) ? cb() : Promise.resolve()
+        }
+      },
+      add (callback) {
+        this.stack.push(callback)
+        return this.padding = this.run()
+      },
+      async clear() {
+        this.stack = []
+        return this.padding = this.run()
+      }
+    }
+
+    async function selectFolder() {
+      await watchQueue.clear()
       Object.keys(galleryImageStore).forEach(deleteGalleryImage)
       return window['backend'].selectFolder()
     }
@@ -109,8 +130,8 @@ const app = {
     })
 
     window['backend'].watch((_, { event, filePath }) => {
-      if (event === 'add') addGelleryImage(filePath)
-      if (event === 'unlink') deleteGalleryImage(filePath)
+      if (event === 'add') watchQueue.add(() => addGelleryImage(filePath))
+      if (event === 'unlink') watchQueue.add(() => deleteGalleryImage(filePath))
     })
 
     return {
