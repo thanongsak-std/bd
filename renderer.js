@@ -61,7 +61,7 @@ const app = {
         this.stack.push(callback)
         return this.padding = this.run()
       },
-      async clear() {
+      clear() {
         this.stack = []
         return this.padding = this.run()
       }
