@@ -22,7 +22,7 @@ app.whenReady().then(async () => {
     webPreferences: {
       preload: path.join(__dirname, 'preload.js')
     },
-    icon:'IMG/Backdrop_Booth_logo.png',
+    icon:'IMG/CS logo.png',
     contextIsolation: false,
     nodeIntegration: true
   })
