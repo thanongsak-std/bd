@@ -1,6 +1,6 @@
 {
-  "name": "backdrop-booth",
-  "version": "1.2.3",
+  "name": "backdrop-booth-cs",
+  "version": "1.0.0",
   "description": "A minimal Electron application",
   "author": "tob.thanongsak",
   "main": "main.js",
