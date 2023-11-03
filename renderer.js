@@ -9,7 +9,7 @@ const DEBUG = false
 
 const baseURL = () => DEBUG
   ? window['backend'].getServerUrl()
-  : 'https://Backdropboothcs.github.io/BD-CS'
+  : 'https://thanongsak-std.github.io/bd'
 
 function setup () {
   const peer = new peerjs.Peer(null, { debug: 2 })
